@@ -1,0 +1,127 @@
+<!DOCTYPE HTML>
+<html>
+
+	<head lang="en-GB">
+	
+		<meta charset="UTF-8">
+		
+		<title>Basic Personal Assistant</title>
+		
+		<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+	
+	</head>
+	
+	<body>
+	
+		<div class="container">
+		
+			<div id = "textBox" contenteditable="true"></div>
+			
+			<button id = "microphoneButton">Speak</button>
+			
+		</div>
+		
+		<!-- https://dysgenix.github.io/PersonalAssistant.html -->
+		
+		<script>
+		
+			window.SpeechRecognition = window.SpeechRecognition || webkitSpeechRecognition;
+		
+			var microphone = document.getElementById("microphoneButton"),
+				speechRecognition = new SpeechRecognition(),
+				speechSynthesis = window.speechSynthesis,
+				listening = false;
+			
+			var outputText = document.createElement("p"),
+				container = document.getElementById("textBox");
+				
+			speechRecognition.interimResults = true;
+			container.appendChild(outputText);
+			
+			microphone.addEventListener("click", function () {
+			
+				if (listening) {
+				
+					speechRecognition.stop();
+				
+				} else {
+					
+					listening = true;
+					speechRecognition.start();
+				
+				}
+			
+			});
+			
+			speechRecognition.addEventListener("onstart", function () { listening = true; });
+			
+			speechRecognition.addEventListener("onresult", function (e) {
+			
+				outputText.textContent = speechToText;
+					
+				if (e.results[0].isFinal) {
+						
+					if (speechToText.includes("what time is it")){
+					
+						speak(getTime());
+					
+					} else if (speechToText.includes("what day is it")) {
+					
+						speak(getDate());
+					
+					} else if (speechToText.includes("am I online")) {
+					
+						speak(getOnlineStatus());
+					
+					}					
+					
+				}
+			
+			});
+			
+			function speak (output) {
+			
+				outputSentence = new SpeechSynthesisUtterance(output);
+				
+				setVoice(outputSentence);
+				speechSynthesis.speak(outputSentence);
+			
+			}
+			
+			function setVoice (speechSynthesisUtterance) {
+			
+				var voices = speechSynthesis.getVoices();
+				
+				speechSynthesisUtterance.voice = voices.find(function (v) { return v.name === "Google UK English Female" || voices[0]; });
+			
+			}
+			
+			function getTime () {
+			
+				return "The time is " + new Date(Date.now()).toLocaleString("en-UK", { hour: "numeric", minute: "numeric", hour12: true});
+			
+			}
+			
+			function getDate () {
+			
+				return "The date is " + new Date(Date.now()).toLocaleDateString();
+			
+			}
+			
+			function getOnlineStatus () {
+			
+				if (navigator.onLine) {
+				
+					return "This device is online and connected to the internet.";
+				
+				}
+				
+				return "This device is not online and not connected to the internet.";
+			
+			}
+			
+		</script>
+		
+	</body>
+	
+</html>
